@@ -63,7 +63,7 @@ What tools would we need to answer this question?
 
 To help focusing the discussion, I suggest that we all agree on the format of the card deck, I suggest we use of cards numbered as characters because:
 
- 1. [Lists are the best thing in `R`](https://macrofun-sheffield.github.io/session/Algorithm_design/)
+ 1. [Lists are the best thing in `R`](https://raw.githack.com/TGuillerme/CardShuffling/refs/heads/main/Resources/algorithm_design.html)
  2. Numbering the cards as characters like `"1"` allows to record the card initial position easily. If the 18th card is called `"5"` we know it was in the 5th position in the initial deck.
 
 Once we've agreed with the set of functions needed
@@ -94,7 +94,7 @@ I got to the solution by using the following functions (but note that there's ma
 ## Sharing solid code: version control and unit testing
 
 Once you've worked your function, you can now share it with your friends to find the answer!
-To do this, it's quiet simple, we'll just be sharing our code by pushing it to [this repo]().
+To do this, it's quiet simple, we'll just be sharing our code by pushing it to [this repo](https://github.com/TGuillerme/CardShuffling).
 
 And that's it, you've now done [version control](https://github.com/TGuillermeTeaching/VersionControl)!
 
@@ -113,7 +113,9 @@ The answer is...
 
 That's it. Just 8. This is a shit shuffling method if you're really good at it.
 
-But why 8? It's actually a fun math problem with a nerdy solution you can find [here]() (thanks to Abigail Pastore for writing it and guiding me through it).
+You can find my solution [here](https://raw.githack.com/TGuillerme/CardShuffling/main/Resources/card.shuffle_big.html) (by no means the best one).
+
+But why 8? It's actually a fun math problem with a nerdy solution you can find [here](https://github.com/TGuillerme/CardShuffling/blob/main/Resources/Mathematical_solution.pdf) (thanks to Abigail Pastore for writing it and guiding me through it).
 
 And how does it scale with different number of cards? This again, is a super cool problem you can try to figure out by just using the code you've made! Have fun and learn about modulos and chaos!
 
