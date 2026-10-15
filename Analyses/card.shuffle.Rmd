@@ -234,7 +234,7 @@ Or actually for any even number of cards from 2 to 100 cards and plot the soluti
 
 ```{r, eval = TRUE}
 ## The deck sizes
-deck_sizes <- as.list(seq(from = 2, to = 10000, by = 2))
+deck_sizes <- as.list(seq(from = 2, to = 200, by = 2))
 
 ## Apply all the deck shuffle sizes
 shuffle_numbers <- lapply(deck_sizes, n.shuffles)
