@@ -1,0 +1,253 @@
+---
+title: "Card shuffle"
+author: "Thomas Guillerme"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    fig_width: 12
+    fig_height: 6
+---
+
+Brut force solving the perfect card shuffle problem:
+
+# First let's create some functions
+
+## Structure I've gone with
+
+
+```
+deck <- list()
+
+deck_not_split
+  |
+  \_ one_element containing n character 
+
+deck_split
+  |
+  \_ one_element containing half the character
+  |
+  \_ one_other_element containing half the character
+
+```
+
+
+## Making a deck
+
+We can make a deck of cards by naming the cards from 1 to _n_.
+For tracking the cards we will coerce the name as characters so the first card initially is called `"1"`.
+`"1"` can then be in position _x_ after any shuffles.
+The argument this function will take is simply the number of cards: `n_cards`.
+The function returns a series of _n_ cards into a `"list"` object: this is our deck in `R`.
+
+
+```{r, eval = TRUE}
+## This is the function that creates a deck
+make.deck <- function(n_cards) {
+    return(list(as.character(seq(1:n_cards))))
+}
+```
+
+## Splitting a deck
+
+This function returns the deck split in half: that is our `"list"` split into two `"list"` of the same length:
+
+```{r, eval = TRUE}
+## This is the function for splitting the deck in half
+split.deck <- function(deck) {
+    ## Getting the number of cards (and half of it)
+    n_cards <- length(deck[[1]])
+    half_deck <- n_cards/2
+
+    ## Splitting the deck
+    return(list(
+                list(deck[[1]][1:half_deck]),
+                list(deck[[1]][(half_deck+1):n_cards])
+           ))
+}
+```
+
+<details>
+  <summary>[Click to expand] Going level 2:
+</summary>
+
+What about the following generalisations:
+
+ * How to handle uneven decks? Do it? Or don't do it and add an error message for `split.deck(7)`
+ * What if you don't want to split right in the middle? How about adding a default `split.proportion = 0.5` option
+
+</details>
+
+
+## Shuffling deck
+
+This function will reshuffle the split deck (a list of two lists) back into a single list with the succession of the first cards from both half decks, then the second cards, etc.
+
+```{r, eval = TRUE}
+## This is the shuffling function
+shuffle.deck <- function(deck) {
+
+    ## Make the data into a matrix of two columns
+    two_piles <- matrix(unlist(deck), ncol = 2)
+
+    ## Transposing it to get all the values successively
+    two_piles <- t(two_piles)
+
+    ## "Flatten" the matrix and make it as a list
+    return(list(c(two_piles)))
+
+    ## Making a two column matrix
+    # return(list(c(t(matrix(unlist(deck), ncol = 2))))) #TG: for optimisation later
+}
+```
+
+<details>
+  <summary>[Click to expand] Going level 2:
+</summary>
+
+What about the following generalisations:
+
+ * What about different types of shuffling? E.g. not 1/1?
+ 
+</details>
+
+
+# One shuffle step by step
+
+We can now see how these functions work by doing a shuffle step by step.
+For printing on screen limitation, we're going to perform it on a tiny 8 cards deck.
+
+```{r, eval = TRUE}
+## First we create a deck
+deck_8 <- make.deck(8)
+
+## This is what's in the deck
+deck_8
+
+## Then let's split it:
+split_deck_8 <- split.deck(deck_8)
+
+## And these are our two half decks
+split_deck_8
+
+## And now we can shuffle it:
+shuffle.deck(split_deck_8)
+```
+
+Note that we can also directly pipe the functions to be faster: `shuffle.deck(split.deck(make.deck(8)))`.
+
+# How many shuffles are necessary to deshuffle the deck?
+
+With these functions, this becomes rather simple: we now just need to make a deck, split and shuffle it and then look at whether the resulting cards order is the same as when the deck was created.
+If it is, only one shuffle was needed (!), if it isn't we count the shuffle and repeat the whole procedure.
+We can do this using a `while` loop (more on that below) and simple logic comparisons.
+<!-- Introduce logics -->
+Again let's just make an example for a mini 8 cards deck:
+
+```{r, eval = TRUE}
+## First we create a deck
+deck_8 <- make.deck(8)
+
+## Split and shuffle it:
+shuffled_deck_8 <- shuffle.deck(split.deck(deck_8))
+```
+
+We can now compare the original deck and the shuffled one using logic comparisons:
+
+```{r, eval = TRUE}
+## Are the cards in the same order?
+deck_8[[1]] == shuffled_deck_8[[1]]
+```
+
+Because we're not interested in the details (i.e. if at least one card is misordered, it's not the same deck), we can use the logical comparison `all()` that checks if all the comparisons are `TRUE`: it returns `TRUE` if it's the case or else `FALSE`:
+
+```{r, eval = TRUE}
+## Are all the cards in the correct order?
+all(deck_8[[1]] == shuffled_deck_8[[1]])
+## Of course not...
+```
+
+We now need to keep track of the shuffle numbers and can use a while loop
+<!-- introduce while and increment -->
+
+```{r, eval = TRUE}
+## The number of shufflings
+count_shuffles <- 1
+
+## Let's shuffle all!
+while(!all(deck_8[[1]] == shuffled_deck_8[[1]])) {
+    ## Reshuffle the deck
+    shuffled_deck_8 <- shuffle.deck(split.deck(shuffled_deck_8))
+
+    ## Increment the number of shuffles
+    count_shuffles <- count_shuffles + 1
+}
+```
+
+When the while loop stops, we have the number of shuffles necessary to reorder the deck:
+
+```{r, eval = TRUE}
+## How many shuffles where performed?
+count_shuffles
+```
+
+# The brute force approach
+
+Now this is quiet tedious even just for 8 cards, to simplify everything we can wrap the whole procedure into a single function: `n.shuffles`
+
+```{r, eval = TRUE}
+## How many shuffles for n cards?
+n.shuffles <- function(n_cards) {
+    ## Make the original deck
+    orig_deck <- make.deck(n_cards)
+
+    ## Initiate the shuffle counter
+    count_shuffles <- 0
+
+    ## Perform the first shuffle
+    shuffle_deck <- shuffle.deck(split.deck(orig_deck))
+
+    ## Increment the counter
+    count_shuffles <- count_shuffles + 1
+
+    ## Perform all the shuffles
+    while(!all(orig_deck[[1]] == shuffle_deck[[1]])) {
+        ## Reshuffle the deck
+        shuffle_deck <- shuffle.deck(split.deck(shuffle_deck))
+
+        ## Increment the number of shuffles
+        count_shuffles <- count_shuffles + 1
+    }
+
+    ## Return the number of shuffles
+    return(count_shuffles)
+}
+```
+
+So we can now check our answer for the original question:
+
+```{r, eval = TRUE}
+## How many shuffles for 52 cards
+n.shuffles(52)
+```
+
+Or actually for any even number of cards from 2 to 100 cards and plot the solutions:
+
+```{r, eval = TRUE}
+## The deck sizes
+deck_sizes <- as.list(seq(from = 2, to = 10000, by = 2))
+
+## Apply all the deck shuffle sizes
+shuffle_numbers <- lapply(deck_sizes, n.shuffles)
+
+## Display the results
+plot(deck_sizes, shuffle_numbers, type = "l",
+     xlab = "Deck size", ylab = "Number of required shuffles")
+```
+
+<details>
+  <summary>[Click to expand] Going level 2:
+</summary>
+
+This is fucking slow! How about optimising it? Maybe doing some `C` implementation?
+
+</details>
